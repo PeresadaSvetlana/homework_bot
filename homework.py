@@ -103,7 +103,6 @@ def main():
     """Основная логика работы бота."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
-    step = current_timestamp - 604800
     if not check_tokens():
         logger.critical('Ошибка в получении токенов!')
         sys.exit()
@@ -111,7 +110,7 @@ def main():
     prev_report = {}
     while True:
         try:
-            response = get_api_answer(step)
+            response = get_api_answer(current_timestamp)
             homework = check_response(response)
             if homework:
                 message = parse_status(homework)

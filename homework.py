@@ -111,11 +111,11 @@ def main():
     while True:
         try:
             response = get_api_answer(current_timestamp)
-            homework = check_response(response)
+            homework = check_response(response)[0]
             if homework:
                 message = parse_status(homework)
                 if homework:
-                    message = parse_status(bot, homework[0])
+                    message = parse_status(homework)
             current_timestamp = response.get("current_date")
             time.sleep(RETRY_TIME)
 

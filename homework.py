@@ -1,5 +1,6 @@
 import logging
 import os
+from pickle import NONE
 import sys
 import time
 from http import HTTPStatus
@@ -28,10 +29,9 @@ logger.addHandler(logging.StreamHandler())
 def send_message(bot, message):
     """Отправляет сообщение."""
     logger.info(f"Начало отправки сообщения: {message}")
-    try:
-        bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-    except Exception as error:
-        logger.exception(f"Сообщение не отправлено: {error}")
+    bot_message = bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+    if not bot_message:
+        raise telegram.TelegramError("Сообщение не отправлено")
     else:
         logger.info(f"Сообщение отправлено: {message}")
 
@@ -61,18 +61,16 @@ def check_response(response):
     homeworks_response = response['homeworks']
     logger.info("Список домашних работ получен")
     if not homeworks_response:
-        message_status = logger.error("Отсутствует статус homeworks")
+        message_status = ("Отсутствует статус homeworks")
         raise LookupError(message_status)
     if not isinstance(homeworks_response, list):
-        message_list = logger.error("Невернй тип входящих данных")
+        message_list = ("Невернй тип входящих данных")
         raise TypeError(message_list)
     if 'homeworks' not in response.keys():
         message_homeworks = 'Ключ "homeworks" отсутствует в словаре'
-        logger.error(message_homeworks)
         raise KeyError(message_homeworks)
     if 'current_date' not in response.keys():
         message_current_date = 'Ключ "current_date" отсутствует в словаре'
-        logger.error(message_current_date)
         raise KeyError(message_current_date)
     return homeworks_response
 
@@ -82,13 +80,14 @@ def parse_status(homework):
     homework_name = homework.get("homework_name")
     homework_status = homework.get("status")
     verdict = HOMEWORK_VERDICTS[homework_status]
+    if not verdict:
+        message_verdict = "Такого статуса нет в словаре"
+        raise KeyError(message_verdict)
     if homework_status not in HOMEWORK_VERDICTS:
         message_homework_status = "Такого статуса не существует"
-        logger.error(message_homework_status)
         raise KeyError(message_homework_status)
     if "homework_name" not in homework:
         message_homework_name = "Такого имени не существует"
-        logger.error(message_homework_name)
         raise KeyError(message_homework_name)
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
@@ -120,12 +119,10 @@ def main():
                     prev_report = current_report.copy()
                     current_report['output'] = response.get("homework_name")
             current_timestamp = response.get("current_date")
-            time.sleep(RETRY_TIME)
 
         except Exception as error:
             message = f"Сбой в работе программы: {error}"
             logger.error(message)
-            time.sleep(RETRY_TIME)
         else:
             logger.error("Сбой, ошибка не найдена")
         finally:

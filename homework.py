@@ -1,6 +1,5 @@
 import logging
 import os
-from pickle import NONE
 import sys
 import time
 from http import HTTPStatus

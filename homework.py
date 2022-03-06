@@ -114,8 +114,11 @@ def main():
             homework = check_response(response)[0]
             if homework:
                 message = parse_status(homework)
-                if homework:
-                    message = parse_status(homework)
+                current_report['output'] = response.get("homework_name")
+                if current_report != prev_report:
+                    send_message(bot, message)
+                    prev_report = current_report.copy()
+                    current_report['output'] = response.get("homework_name")
             current_timestamp = response.get("current_date")
             time.sleep(RETRY_TIME)
 
@@ -123,13 +126,6 @@ def main():
             message = f"Сбой в работе программы: {error}"
             logger.error(message)
             time.sleep(RETRY_TIME)
-            if current_report != prev_report:
-                send_message(bot, message, error)
-                prev_report = current_report.copy()
-                current_report['name_messages'] = send_message(
-                    bot, message, error
-                )
-                current_report['output'] = response.get("homework_name")
         else:
             logger.error("Сбой, ошибка не найдена")
         finally:

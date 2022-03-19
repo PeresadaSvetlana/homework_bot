@@ -112,13 +112,11 @@ def main():
             homework = check_response(response)[0]
             if homework:
                 message = parse_status(homework)
-                current_report['output'] = response.get("homework_name")
-                current_report['status'] = response.get("status")
+                current_report[response.get("homework_name")] = response.get("status")
                 if current_report != prev_report:
                     send_message(bot, message)
                     prev_report = current_report.copy()
-                    current_report['output'] = response.get("homework_name")
-                    current_report['status'] = response.get("status")
+                    current_report[response.get("homework_name")] = response.get("status")
             current_timestamp = response.get("current_date")
 
         except Exception as error:
